@@ -59,6 +59,12 @@ func (c *TrueClock) updateRootDispersion() {
 	c.tracking.RootDispersion = dispersion
 }
 
+func dispersionAt(tracking chrony.Tracking, systemTime time.Time, maxClockError float64) float64 {
+	elapsed := systemTime.Sub(tracking.RefTime).Seconds()
+	errorRate := (maxClockError + tracking.SkewPPM + tracking.ResidFreqPPM) * 1e-6
+	return tracking.RootDispersion + elapsed * errorRate
+}
+
 func (c *TrueClock) startChronyPoller() {
 	ticker := time.NewTicker(time.Second)
 
