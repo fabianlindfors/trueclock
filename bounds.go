@@ -11,8 +11,8 @@ type Bounds struct {
 	Latest time.Time
 }
 
-func boundsFromTracking(tracking *chrony.Tracking) Bounds {
-	errorBound := roundFloat64ToNanos(math.Abs(tracking.CurrentCorrection)+ tracking.RootDispersion + (tracking.RootDelay / 2.0))
+func boundsFromTracking(tracking chrony.Tracking) Bounds {
+	errorBound := roundFloat64ToNanos(math.Abs(tracking.CurrentCorrection) + tracking.RootDispersion + (tracking.RootDelay / 2.0))
 
 	errorBoundNanos := int64(errorBound * 1000000000.0)
 

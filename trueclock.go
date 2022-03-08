@@ -47,21 +47,18 @@ func New() (*TrueClock, error) {
 
 func (c *TrueClock) Now() Bounds {
 	c.mu.Lock()
+	tracking := *c.tracking
 	defer c.mu.Unlock()
 
-	c.updateRootDispersion()
-	return boundsFromTracking(c.tracking)
+	tracking.RootDispersion = calculateDispersion(tracking)
+	return boundsFromTracking(tracking)
 }
 
-func (c *TrueClock) updateRootDispersion() {
-	now := time.Now()
-	dispersion := dispersionAt(*c.tracking, now, MaxClockError)
-	c.tracking.RootDispersion = dispersion
-}
-
-func dispersionAt(tracking chrony.Tracking, systemTime time.Time, maxClockError float64) float64 {
+func calculateDispersion(tracking chrony.Tracking) float64 {
+	systemTime := time.Now()
 	elapsed := systemTime.Sub(tracking.RefTime).Seconds()
-	errorRate := (maxClockError + tracking.SkewPPM + tracking.ResidFreqPPM) * 1e-6
+	errorRate := (MaxClockError + tracking.SkewPPM + tracking.ResidFreqPPM) * 1e-6
+
 	return tracking.RootDispersion + elapsed * errorRate
 }
 
